@@ -1,10 +1,10 @@
-### Docx-Query-RAG
+# Docx-Query-RAG
 
 This project is a modular Retrieval-Augmented Generation (RAG) application that allows users to upload PDF documents, index their content into a Qdrant vector database, and ask questions using the Google Gemini LLM.
 
 The application is built with a focus on performance and modularity, separating configuration, data ingestion, and query logic.
 
-# 🚀 Technologies Used
+## 🚀 Technologies Used
 
 Streamlit: Interactive web interface for file uploading and chat.
 
@@ -16,7 +16,7 @@ LangChain: Framework for document loading, text splitting, and managing the RAG 
 
 HuggingFace Embeddings: Uses all-MiniLM-L6-v2 for creating local, efficient vector embeddings of the text.
 
-# 📂 Project Structure
+## 📂 Project Structure
 
 app.py: The main entry point for the Streamlit application. Handles UI and user interaction.
 
@@ -26,40 +26,40 @@ ingestion_pipeline.py: Logic for processing PDFs, chunking text, and storing vec
 
 rag_query.py: Logic for converting user queries to vectors, searching Qdrant, and querying the Gemini API.
 
-# 🛠️ Setup & Installation
+## 🛠️ Setup & Installation
 
-Clone the repository (or download the files):
+### Clone the repository (or download the files):
 
 git clone <repository_url>
 cd <project_directory>
 
 
-# Install Dependencies:
+### Install Dependencies:
 Ensure you have Python=3.11 installed. Install the required libraries:
 
 pip install streamlit qdrant-client langchain langchain-community langchain-huggingface python-dotenv requests pypdf sentence-transformers
 
 
-# Set up Qdrant:
+### Set up Qdrant:
 You need a running instance of Qdrant. The easiest way is via Docker:
 
 docker run -p 6333:6333 qdrant/qdrant
 
 
-# Note: The code assumes Qdrant is running on localhost:6333.
+### Note: The code assumes Qdrant is running on localhost:6333.
 
-# Configure Environment Variables:
+### Configure Environment Variables:
 Create a .env file in the root directory and add your Gemini API key:
 
 GEMINI_API_KEY=your_google_gemini_api_key_here
 
 
-# Run the Application:
+### Run the Application:
 
 streamlit run app.py
 
 
-# 📖 How to Use
+## 📖 How to Use
 
 Open the Streamlit app in your browser (usually http://localhost:8501).
 
