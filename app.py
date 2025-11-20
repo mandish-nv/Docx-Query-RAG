@@ -1,7 +1,10 @@
 import streamlit as st
 import os
 import tempfile
-import rag_backend  # Importing the logic file
+
+# Import the specific functions from the new modules
+from ingestion_pipeline import ingest_documents_to_qdrant
+from rag_query import query_qdrant_rag
 
 # Set page configuration
 st.set_page_config(
@@ -32,8 +35,8 @@ def main():
                         tmp_path = tmp_file.name
                     
                     try:
-                        # Call the backend ingestion function
-                        rag_backend.ingest_documents_to_qdrant(tmp_path)
+                        # Call the backend ingestion function from ingestion_pipeline.py
+                        ingest_documents_to_qdrant(tmp_path)
                     finally:
                         # Cleanup temp file
                         os.remove(tmp_path)
@@ -47,8 +50,8 @@ def main():
     if st.button("Ask Gemini"):
         if user_query:
             with st.spinner("Thinking..."):
-                # Call the backend query function
-                answer, docs = rag_backend.query_qdrant_rag(user_query)
+                # Call the backend query function from rag_query.py
+                answer, docs = query_qdrant_rag(user_query)
             
             # Display Answer
             st.markdown("### Answer:")
