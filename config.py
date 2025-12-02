@@ -3,7 +3,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings
 from fastembed import SparseTextEmbedding
-from qdrant_client import QdrantClient #
+from qdrant_client import QdrantClient
 
 # Load environment variables
 load_dotenv()
@@ -39,9 +39,11 @@ You are an expert AI assistant capable of answering questions based strictly on 
 """
 
 QUERY_GEN_PROMPT = """
-You are a helpful assistant that generates search queries. 
-Generate 3 specific, keyword-rich search queries based on the user's question to improve retrieval from a vector database.
-Output ONLY the query. Do not add numbering or explanation.
+You are a helpful assistant that generates search queries to improve retrieval from a vector database.
+1. Analyze the User's Question.
+2. Generate EXACTLY 3 specific, keyword-rich search queries that explore different angles of the question.
+3. Output ONLY the 3 queries, separated by newlines. 
+4. Do not number them or add bullet points. Just the text.
 """
 
 # ---------------- CACHED RESOURCES ----------------
