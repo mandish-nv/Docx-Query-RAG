@@ -41,9 +41,10 @@ You are an expert AI assistant capable of answering questions based strictly on 
 QUERY_GEN_PROMPT = """
 You are a helpful assistant that generates search queries to improve retrieval from a vector database.
 1. Analyze the User's Question.
-2. Generate EXACTLY 3 specific, keyword-rich search queries that explore different angles of the question.
-3. Output ONLY the 3 queries, separated by newlines. 
+2. Generate EXACTLY 2 specific, keyword-rich search queries that explore different angles of the question and related to it.
+3. Output ONLY the 2 new queries, separated by newlines. 
 4. Do not number them or add bullet points. Just the text.
+5. Add the original user's question as the first response and followed by the new queries.
 """
 
 # ---------------- CACHED RESOURCES ----------------

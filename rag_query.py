@@ -1,4 +1,3 @@
-# rag_query.py
 import streamlit as st
 import requests
 import json
@@ -6,9 +5,6 @@ from qdrant_client import models
 import config
 import time
 
-# ---------------------------------------
-# Existing Functions (UNCHANGED)
-# ---------------------------------------
 
 def generate_refined_query(user_query):
     prompt = f"{config.QUERY_GEN_PROMPT}\nUser Question: {user_query}"
@@ -62,12 +58,12 @@ def query_qdrant_rag(user_query: str, chat_history: list, page_filter: int = Non
         models.Prefetch(
             query=dense_query,
             using=config.DENSE_VECTOR_NAME,
-            limit=20,
+            limit=40,
         ),
         models.Prefetch(
             query=sparse_query,
             using=config.SPARSE_VECTOR_NAME,
-            limit=20,
+            limit=40,
         ),
     ]
 
@@ -120,9 +116,8 @@ def query_qdrant_rag(user_query: str, chat_history: list, page_filter: int = Non
     return answer, retrieved_docs
 
 
-# ---------------------------------------
-# LangGraph Wrapper (FIXED)
-# ---------------------------------------
+
+# LangGraph Wrapper 
 
 from rag_graph import rag_graph
 

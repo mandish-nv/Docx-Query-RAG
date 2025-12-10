@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import os
 import tempfile
@@ -6,10 +5,10 @@ import tempfile
 from ingestion_pipeline import ingest_documents_to_qdrant
 from rag_query import run_rag_with_graph
 
-st.set_page_config(page_title="Docx-Query-RAG", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Docx-Query-RAG", layout="wide")
 
 def main():
-    st.title("🧠 Docx-Query-RAG (LangGraph Agents)")
+    st.title("Docx-Query-RAG")
 
     # Sidebar
     with st.sidebar:
@@ -54,7 +53,7 @@ def main():
                 st.markdown(answer)
 
                 # Timing Info
-                st.subheader("⏱ Timing Report (ms)")
+                st.subheader("Timing Report (ms)")
                 st.json(timings)
 
                 # Retrieved Context
