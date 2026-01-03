@@ -9,9 +9,17 @@ st.set_page_config(page_title="Rule Generator", layout="wide")
 
 st.title("⚖️ Intelligent Rule Generator")
 
-with st.sidebar:
-    if st.button("⬅ Back to Dashboard"):
-        st.switch_page("main.py") # or your main dashboard file
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] ul li:first-child {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# with st.sidebar:
+#     if st.button("⬅ Back to Dashboard"):
+#         st.switch_page("main.py") # or your main dashboard file
 
 col_input, col_output = st.columns([1, 2])
 

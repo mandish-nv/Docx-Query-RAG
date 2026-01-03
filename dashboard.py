@@ -27,7 +27,7 @@ def show_dashboard():
     </style>
     """, unsafe_allow_html=True)
     
-    st.title("⚖️ KanunMitra")
+    st.title("⚖️ Kanun Mitra")
     st.markdown("<p class='subtitle'>Your AI-powered platform for legal assistance and document analysis.</p>", unsafe_allow_html=True)
     st.divider()
     

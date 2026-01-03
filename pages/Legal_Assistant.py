@@ -9,9 +9,17 @@ st.set_page_config(page_title="Legal Assistant", layout="wide")
 st.title("💬 Legal Assistant Chat")
 st.info("Ask questions based on the ingested legal documents.")
 
-with st.sidebar:
-    if st.button("⬅ Back to Dashboard"):
-        st.switch_page("main.py") # or your main dashboard file
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] ul li:first-child {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# with st.sidebar:
+#     if st.button("⬅ Back to Dashboard"):
+#         st.switch_page("main.py") # or your main dashboard file
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

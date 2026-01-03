@@ -70,4 +70,9 @@ class Authentication:
         """Logout user"""
         if 'user' in st.session_state:
             del st.session_state['user']
-        st.rerun()
+        # Clear any other session data (like chat history)
+        if 'messages' in st.session_state:
+            st.session_state.messages = []
+        
+        # Redirecting to the main entry point (app.py)
+        st.switch_page("app.py")

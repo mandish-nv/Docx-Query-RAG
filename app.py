@@ -4,7 +4,7 @@ from utils.auth import Authentication
 
 # Global Page Config for the Login Screen
 st.set_page_config(
-    page_title="KanunMitra - Legal Assistance Portal",
+    page_title="Kanun Mitra",
     page_icon="⚖️",
     layout="wide"
 )
@@ -15,8 +15,16 @@ is_logged_in = auth.check_session()
 # Logic to hide sidebar on login
 if not is_logged_in:
     st.markdown("<style>[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
+else:
+    # This CSS finds the navigation list and hides the first item (app.py)
+    st.markdown("""
+        <style>
+            [data-testid="stSidebarNav"] ul li:first-child {
+                display: none;
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
-
 
 def main():
     if is_logged_in:
@@ -26,7 +34,7 @@ def main():
         # Login Form logic
         left_col, right_col = st.columns([2, 1])
         with right_col:
-            st.markdown('<h1 style="text-align: center; color: #ffffff;">⚖️ KanunMitra</h1>', unsafe_allow_html=True)
+            st.markdown('<h1 style="text-align: center; color: #ffffff;">⚖️ Kanun Mitra</h1>', unsafe_allow_html=True)
             st.markdown('<h3 style="text-align: center; color: #ffffff;">Legal Assistance Portal</h3>', unsafe_allow_html=True)
             with st.form("login_form"):
                 username = st.text_input("Username", placeholder="Enter your username", key="login_username")

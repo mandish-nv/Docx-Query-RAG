@@ -8,12 +8,20 @@ user_info = init_page("Document Ingestion")
 
 st.set_page_config(page_title="Document Ingestion")
 
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] ul li:first-child {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📄 Document Ingestion")
 st.write("Upload PDF laws or company documents to add them to the AI knowledge base.")
 
-with st.sidebar:
-    if st.button("⬅ Back to Dashboard"):
-        st.switch_page("main.py") # or your main dashboard file
+# with st.sidebar:
+#     if st.button("⬅ Back to Dashboard"):
+#         st.switch_page("main.py") # or your main dashboard file
 
 uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
 
