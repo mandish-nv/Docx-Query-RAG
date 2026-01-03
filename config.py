@@ -73,6 +73,26 @@ You are a helpful assistant that generates search queries to improve retrieval f
 4. Do not number them or add bullet points. Just the text.
 """
 
+# --- NEW PROMPTS FOR RULE GENERATION ---
+RULE_GENERATION_PROMPT = """
+You are a **Policy & Compliance Architect**. Your task is to draft a cohesive set of organizational rules.
+1.  **Inputs:** You will be given a `User Context` (target organization), `User Custom Rules` (specific desires), and `Legal Context` (retrieved laws from the database).
+2.  **Synthesis:** Combine the user's custom rules with the mandatory legal requirements found in the Legal Context.
+3.  **Conflict Resolution:** If a custom rule directly contradicts a law in the Legal Context, prioritize the Law but explicitly mention the modification.
+4.  **Citations:** When a rule is derived from the Legal Context, cite the source (e.g., [Page X]).
+5.  **Format:** Output a structured Markdown list of rules, categorized logically.
+"""
+
+COMPLIANCE_CHECK_PROMPT = """
+You are a **Strict Compliance Auditor**.
+1.  Review the `Drafted Rules` provided above.
+2.  Compare them against the `Legal Context` (the laws retrieved from the database).
+3.  **Identify Violations:** Flag any rule that contradicts the laws.
+4.  **Identify Gaps:** Point out if a mandatory legal requirement from the context is missing from the draft.
+5.  **Verdict:** Provide a final status: "✅ Compliant", "⚠️ Minor Issues", or "❌ Non-Compliant".
+6.  **Output:** A concise audit report.
+"""
+
 # ---------------- CACHED RESOURCES ----------------
 _DENSE_MODEL = None
 _SPARSE_MODEL = None

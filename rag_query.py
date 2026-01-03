@@ -301,3 +301,86 @@ def query_qdrant_rag(user_query: str, chat_history: list, refined_queries: List[
     except Exception as e:
         logging.error(f"LLM Generation Failed after retries: {e}")
         return "I encountered an error generating the answer due to high server load. Please try again in a moment.", final_docs
+
+
+# ---------------- NEW RULE GENERATION FUNCTION ----------------
+
+def generate_compliant_rules(rule_context: str, custom_rules: str) -> Tuple[str, str, List[Dict]]:
+    """
+    1. Retrieve laws based on 'rule_context' and 'custom_rules'.
+    2. Generate rules combining custom inputs and laws.
+    3. Perform compliance check.
+    """
+    dense_model = config.get_dense_model()
+    sparse_model = config.get_sparse_model()
+    client_qdrant = config.get_qdrant_client()
+
+    if not dense_model or not sparse_model or not client_qdrant:
+        return "Error: System resources not available.", "", []
+
+    # 1. Retrieval: Use context and custom rules as query intent
+    query_intent = f"Rules, laws, and compliance regarding {rule_context} and {custom_rules}"
+    
+    # We do a direct hybrid search here (simplifying vs full RAG graph for this specific task)
+    raw_docs = perform_hybrid_search(query_intent, client_qdrant, dense_model, sparse_model)
+    
+    # Re-rank to ensure high relevance
+    final_docs = rerank_documents(query_intent, raw_docs, top_k=15)
+    
+    if not final_docs:
+        return "Could not find relevant laws in the database to base the rules on.", "N/A", []
+
+    # Prepare Context String
+    legal_context_str = "\n".join([f"[Page {d['page']}]: {d['content']}" for d in final_docs])
+
+    # 2. Rule Generation
+    gen_prompt = f"""
+    LEGAL CONTEXT (from database):
+    {legal_context_str}
+
+    USER CONTEXT (Organization Type): {rule_context}
+    USER CUSTOM RULES (Desired): {custom_rules}
+    """
+
+    def _gen_rules_call():
+        return client.models.generate_content(
+            model=config.LLM_MODEL,
+            contents=gen_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=config.RULE_GENERATION_PROMPT,
+                temperature=0.3
+            )
+        )
+
+    try:
+        rule_response = _execute_with_retry(_gen_rules_call)
+        generated_rules = rule_response.text
+    except Exception as e:
+        return f"Error generating rules: {e}", "", final_docs
+
+    # 3. Compliance Check
+    audit_prompt = f"""
+    LEGAL CONTEXT (from database):
+    {legal_context_str}
+
+    DRAFTED RULES:
+    {generated_rules}
+    """
+
+    def _audit_call():
+        return client.models.generate_content(
+            model=config.LLM_MODEL,
+            contents=audit_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=config.COMPLIANCE_CHECK_PROMPT,
+                temperature=0.1 
+            )
+        )
+
+    try:
+        audit_response = _execute_with_retry(_audit_call)
+        compliance_report = audit_response.text
+    except Exception as e:
+        compliance_report = f"Error performing compliance check: {e}"
+
+    return generated_rules, compliance_report, final_docs
