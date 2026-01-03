@@ -10,6 +10,7 @@ from ingestion_pipeline import ingest_documents_to_qdrant
 from rag_graph import run_rag_with_graph 
 from rag_query import generate_compliant_rules 
 import config
+from dashboard import show_dashboard
 
 # Import Auth from new code
 from utils.auth import Authentication
@@ -19,10 +20,43 @@ st.set_page_config(
     page_title="KanunMitra - Legal Assistance Portal",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded" # Changed to expanded so it's visible after login
 )
 
-# --- CSS Styles from New Code ---
+# Initialize authentication
+auth = Authentication()
+is_logged_in = auth.check_session()
+
+# --- DYNAMIC CSS STYLES ---
+if not is_logged_in:
+    # Hide sidebar entirely on login page
+    sidebar_style = """
+    <style>
+        [data-testid="stSidebar"] {
+            display: none;
+        }
+    </style>
+    """
+else:
+    # Hide ONLY the "app" (first) link in the sidebar navigation
+    sidebar_style = """
+    <style>
+        /* Target the navigation list and hide the first item (usually the main script) */
+        [data-testid="stSidebarNav"] ul li:first-child {
+            display: none;
+        }
+        
+        /* Optional: Remove the extra padding/gap left by the hidden item */
+        [data-testid="stSidebarNav"] {
+            padding-top: 0rem;
+        }
+    </style>
+    """
+    sidebar_style = """
+    """
+
+st.markdown(sidebar_style, unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     .stApp { overflow: hidden !important; max-height: 100vh !important; }
@@ -55,12 +89,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize authentication
-auth = Authentication()
-
 def show_login_form():
     left_col, right_col = st.columns([2, 1])
-    
     with right_col:
         st.markdown('<h1 style="text-align: center; color: #ffffff;">KanunMitra</h1>', unsafe_allow_html=True)
         st.markdown('<h3 style="text-align: center; color: #ffffff;">Legal Assistance Portal</h3>', unsafe_allow_html=True)
@@ -88,117 +118,33 @@ def show_login_form():
                         st.error("Invalid credentials!")
 
     with left_col:
-        # Note: Ensure this image path is correct relative to your app
         try:
             st.image("images/RobotLaw.png", width=600)
         except:
             st.info("Legal AI System Ready")
 
 def show_main_dashboard():
-    """This integrates the 'Old Code' logic as the dashboard"""
     st.title("⚖️ KanunMitra Dashboard")
 
-    # --- Sidebar Navigation (From Old Code) ---
+    # --- Sidebar Content (Authenticated Only) ---
     with st.sidebar:
         user = auth.get_current_user()
-        st.markdown(f"**Logged in as:** {user['username']} ({user['role'].upper()})")
+        st.markdown(f"### User Profile")
+        st.markdown(f"**Logged in as:** {user['username']}")
+        st.markdown(f"<span class='role-badge user'>{user['role'].upper()}</span>", unsafe_allow_html=True)
         
-        if st.button("Logout"):
+        if st.button("Logout", type="secondary", use_container_width=True):
             auth.logout()
             st.rerun()
             
         st.divider()
-        st.header("Navigation")
-        app_mode = st.radio("Choose Mode", ["Chat with PDF", "Rule Generation"])
-        
-        st.divider()
-        st.header("Document Ingestion")
-        uploaded_file = st.file_uploader("Upload PDF (Laws/Docs)", type=["pdf"])
-
-        if uploaded_file and st.button("Process Document"):
-            with st.spinner("Ingesting (Hybrid Mode)..."):
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                    tmp.write(uploaded_file.getvalue())
-                    tmp_path = tmp.name
-                try:
-                    ingest_documents_to_qdrant(tmp_path)
-                    st.sidebar.success("Document Ingested!")
-                finally:
-                    os.remove(tmp_path)
-
-    # --- Application Modes ---
-    if app_mode == "Chat with PDF":
-        render_chat_mode()
-    elif app_mode == "Rule Generation":
-        render_rule_generation_mode()
-
-def render_chat_mode():
-    st.subheader("Interactive Knowledge Base")
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    if user_query := st.chat_input("Ask something from the PDF..."):
-        st.session_state.messages.append({"role": "user", "content": user_query})
-        with st.chat_message("user"):
-            st.markdown(user_query)
-
-        with st.chat_message("assistant"):
-            with st.spinner("Processing..."):
-                answer, docs, timings, refined_queries = run_rag_with_graph(
-                    user_query, 
-                    st.session_state.messages[:-1]
-                )
-                st.markdown(answer)
-                
-                with st.expander("Details: Query Refinement & Timing"):
-                    st.json(timings)
-                if docs:
-                    with st.expander("Retrieved Context"):
-                        for d in docs:
-                            st.info(d["content"])
-
-        st.session_state.messages.append({"role": "assistant", "content": answer})
-
-def render_rule_generation_mode():
-    st.subheader("Intelligent Rule Generator & Compliance Auditor")
     
-    with st.sidebar:
-        st.markdown("### Rule Parameters")
-        industry_options = list(config.INDUSTRY_MANDATORY_RULES.keys())
-        rule_context = st.selectbox("Organization Type", options=industry_options)
-        custom_rules_input = st.text_area("Custom Rules / Desires", height=150)
-        generate_btn = st.button("Generate Rule Book")
-
-    if generate_btn:
-        if not custom_rules_input:
-            st.warning("Please provide some custom rules.")
-        else:
-            with st.spinner("Analyzing laws..."):
-                generated_rules, compliance_report, source_docs = generate_compliant_rules(
-                    rule_context, 
-                    custom_rules_input
-                )
-
-            col1, col2 = st.columns([1.2, 0.8])
-            with col1:
-                st.success(f"📜 {rule_context} Rule Book")
-                st.markdown(generated_rules)
-                st.download_button("Download Rule Book", data=generated_rules, file_name="Rules.md")
-
-            with col2:
-                st.error("Compliance Audit")
-                st.markdown(compliance_report)
+    # show_dashboard()
 
 def main():
-    if auth.check_session():
-        # User is logged in, show the RAG application
+    if is_logged_in:
         show_main_dashboard()
     else:
-        # User not logged in, show login form
         show_login_form()
 
 if __name__ == "__main__":
