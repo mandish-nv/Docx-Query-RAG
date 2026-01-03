@@ -18,6 +18,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ---------------- QDRANT CONFIG ----------------
 COLLECTION_NAME = "pdf_rag_hybrid_collection"
+ORGANIZATION_COLLECTION_NAME = "organization_collection"
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
 QDRANT_URL = f"http://{QDRANT_HOST}:{QDRANT_PORT}"

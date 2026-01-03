@@ -134,8 +134,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHea
 from qdrant_client import models
 import config
 
-def ingest_documents_to_qdrant(pdf_files):
-    # 1. Setup Resources
+def ingest_documents_to_qdrant(pdf_files, user_role="user"):
+    # 1. Determine Collection Name based on Role
+    if user_role == "admin":
+        target_collection = config.ORGANIZATION_COLLECTION_NAME
+    else:
+        target_collection = config.COLLECTION_NAME
+
+    # 2. Setup Resources
     if not pdf_files:
         st.warning("No files provided.")
         return
@@ -151,20 +157,20 @@ def ingest_documents_to_qdrant(pdf_files):
     product_offset = 0  # This will be your global_chunk_id (Per PDF)
 
     try:
-        if not client.collection_exists(collection_name=config.COLLECTION_NAME):
+        if not client.collection_exists(collection_name=target_collection):
             client.create_collection(
-                collection_name=config.COLLECTION_NAME,
+                collection_name=target_collection,
                 vectors_config={config.DENSE_VECTOR_NAME: models.VectorParams(size=config.VECTOR_SIZE, distance=models.Distance.COSINE)},
                 sparse_vectors_config={config.SPARSE_VECTOR_NAME: models.SparseVectorParams(index=models.SparseIndexParams(on_disk=False))}
             )
-            client.create_payload_index(config.COLLECTION_NAME, "file_chunk_id", models.PayloadSchemaType.INTEGER)
-            client.create_payload_index(config.COLLECTION_NAME, "global_chunk_id", models.PayloadSchemaType.INTEGER)
-            client.create_payload_index(collection_name=config.COLLECTION_NAME,field_name="page_number",field_schema=models.PayloadSchemaType.INTEGER)
+            client.create_payload_index(target_collection, "file_chunk_id", models.PayloadSchemaType.INTEGER)
+            client.create_payload_index(target_collection, "global_chunk_id", models.PayloadSchemaType.INTEGER)
+            client.create_payload_index(target_collection, "page_number", models.PayloadSchemaType.INTEGER)
         
-        info = client.get_collection(collection_name=config.COLLECTION_NAME)
+        info = client.get_collection(collection_name=target_collection)
         if info.points_count != 0:
             res, _ = client.scroll(
-                collection_name=config.COLLECTION_NAME,
+                collection_name=target_collection,
                 limit=1,
                 with_payload=True,
                 # order_by={"key": "file_chunk_id", "direction": "desc"} # Following your snippet logic
@@ -173,7 +179,7 @@ def ingest_documents_to_qdrant(pdf_files):
                 product_offset = res[0].payload.get("global_chunk_id", 0) + 1
                 offset = res[0].payload.get("file_chunk_id", 0) + 1
     except Exception as e:
-        st.error(f"Error initializing offsets: {e}")
+        st.error(f"Error initializing offsets for {target_collection}: {e}")
         return
 
     load_progress = st.progress(0)
@@ -198,7 +204,7 @@ def ingest_documents_to_qdrant(pdf_files):
                     page_num = 0
                 
                 client.upsert(
-                    collection_name=config.COLLECTION_NAME,
+                    collection_name=target_collection,
                     points=[
                         models.PointStruct(
                             id=str(uuid.uuid4()), 
@@ -210,21 +216,19 @@ def ingest_documents_to_qdrant(pdf_files):
                                 "global_chunk_id": product_offset, # Document Index (Per PDF)
                                 "file_chunk_id": offset,          # Sequence Index (Continuous)
                                 "chunk": content,
-                                "page_number":page_num,
+                                "page_number": page_num,
                                 "source_file": actual_filename,
                                 "legal_act_name": doc.metadata.get("legal_act_name", "General Document"),
-                                
                             }
                         )
                     ]
                 )
                 offset += 1 
             
-            #product_offset increments after the document is finished
             product_offset += 1
             load_progress.progress((i + 1) / len(pdf_files))
 
         except Exception as e:
             st.error(f"Error on {actual_filename}: {e}")
 
-    st.success(f"Ingested {len(pdf_files)} files. Final Global ID: {product_offset}, Final Chunk ID: {offset}")
+    st.success(f"Ingested into **{target_collection}**. Final Global ID: {product_offset}, Final Chunk ID: {offset}")

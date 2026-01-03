@@ -27,14 +27,21 @@ uploaded_files = st.file_uploader("Choose a PDF file", type=["pdf"],accept_multi
 if uploaded_files: 
     if st.button("Process Documents"):
         with st.spinner("Ingesting documents..."):
-            # 2. Loop through each file in the list
+            # Pass the user role to the ingestion function
+            user_role = user_info.get("role", "user").lower()
+            
+            # Note: Your ingestion_pipeline expects a list of file objects or paths
+            # In your current script, you are looping and sending paths. 
+            # I will keep your loop logic but pass the role.
+            
             for uploaded_file in uploaded_files:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                     tmp.write(uploaded_file.getvalue())
                     tmp_path = tmp.name
                 
                 try:
-                    ingest_documents_to_qdrant(tmp_path)
+                    # Added user_role argument
+                    ingest_documents_to_qdrant(tmp_path, user_role=user_role)
                 finally:
                     if os.path.exists(tmp_path):
                         os.remove(tmp_path)
