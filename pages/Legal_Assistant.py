@@ -4,7 +4,7 @@ from utils.ui_components import init_page
 
 user_info = init_page("Legal Assistant")
 
-st.set_page_config(page_title="Legal Assistant", layout="wide")
+# st.set_page_config(page_title="Legal Assistant", layout="wide")
 
 st.title("💬 Legal Assistant Chat")
 st.info("Ask questions based on the ingested legal documents.")

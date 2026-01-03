@@ -5,7 +5,7 @@ from utils.ui_components import init_page
 
 user_info = init_page("Rule Generator")
 
-st.set_page_config(page_title="Rule Generator", layout="wide")
+# st.set_page_config(page_title="Rule Generator", layout="wide")
 
 st.title("⚖️ Intelligent Rule Generator")
 

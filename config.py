@@ -26,7 +26,7 @@ QDRANT_URL = f"http://{QDRANT_HOST}:{QDRANT_PORT}"
 VECTOR_SIZE = 384 
 DENSE_VECTOR_NAME = "dense_vector"
 
-# Sparse Configuration (SPLADE)
+# Sparse Configuration 
 SPARSE_MODEL_NAME = "Qdrant/bm25"
 SPARSE_VECTOR_NAME = "sparse_vector"
 
@@ -36,7 +36,7 @@ RERANK_MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 TOP_K_RERANK = 10  # Number of docs to pass to LLM after re-ranking
 
 # ---------------- LLM CONFIG ----------------
-LLM_MODEL = "gemini-2.5-flash-lite" 
+LLM_MODEL = "gemini-2.5-flash" 
 
 # Generation Configs exposed for control
 GEN_CONFIG = {

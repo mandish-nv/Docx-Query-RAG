@@ -6,3 +6,4 @@ langchain-core
 pypdf
 qdrant-client
 sentence-transformers
+pymupdf4llm
