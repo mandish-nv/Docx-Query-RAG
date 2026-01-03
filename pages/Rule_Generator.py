@@ -70,4 +70,4 @@ if st.session_state.generated_rules:
         
     with tab3:
         for s in res["sources"]:
-            st.info(f"Page {s['page']}: {s['content'][:300]}...")
+            st.info(f"Page {s['page_number']}: {s['chunk'][:300]}...")

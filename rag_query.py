@@ -157,8 +157,8 @@ def perform_hybrid_search(
         docs = []
         for point in results.points:
             docs.append({
-                "content": point.payload.get("page_content", ""),
-                "page": point.payload.get("page_number", "?"),
+                "chunk": point.payload.get("chunk", ""),
+                "page_number": point.payload.get("page_number", "?"),
                 "score": point.score, 
                 "id": point.id
             })
@@ -178,7 +178,7 @@ def rrf_fusion(results_list: List[List[Dict]], k=60) -> List[Dict]:
 
     for results in results_list:
         for rank, doc in enumerate(results):
-            doc_content = doc["content"]
+            doc_content = doc["chunk"]
             if doc_content not in doc_map:
                 doc_map[doc_content] = doc
             
@@ -206,7 +206,7 @@ def rerank_documents(query: str, docs: List[Dict], top_k: int) -> List[Dict]:
     if not reranker or not docs:
         return docs[:top_k]
 
-    pairs = [[query, d["content"]] for d in docs]
+    pairs = [[query, d["chunk"]] for d in docs]
     
     try:
         scores = reranker.predict(pairs)
@@ -273,7 +273,7 @@ def query_qdrant_rag(user_query: str, chat_history: list, refined_queries: List[
     # 5. Construct Context
     context_parts = []
     for d in final_docs:
-        context_parts.append(f"[Page {d['page']}]: {d['content']}")
+        context_parts.append(f"[Page {d['page_number']}]: {d['chunk']}")
     
     full_context = "\n\n".join(context_parts)
     print(f"\n\n\nFULL_CONTEXT:\n{full_context}\n\n\n")
@@ -335,7 +335,7 @@ def generate_compliant_rules(rule_context_key: str, custom_rules: str) -> Tuple[
     if not final_docs:
         return "Could not find relevant laws in the database.", "N/A", []
 
-    legal_context_str = "\n".join([f"[Page {d['page']}]: {d['content']}" for d in final_docs])
+    legal_context_str = "\n".join([f"[Page {d['page_number']}]: {d['chunk']}" for d in final_docs])
 
     # 3. Rule Generation (Structured Rule Book)
     gen_prompt = f"""
@@ -367,7 +367,7 @@ def generate_compliant_rules(rule_context_key: str, custom_rules: str) -> Tuple[
 
     # 4. Compliance Audit
     audit_prompt = f"LEGAL CONTEXT:\n{legal_context_str}\n\nDRAFTED RULE BOOK:\n{generated_rules}"
-    
+     
     def _audit_call():
         return client.models.generate_content(
             model=config.LLM_MODEL,

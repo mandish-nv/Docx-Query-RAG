@@ -23,19 +23,37 @@ st.write("Upload PDF laws or company documents to add them to the AI knowledge b
 #     if st.button("⬅ Back to Dashboard"):
 #         st.switch_page("main.py") # or your main dashboard file
 
-uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
+uploaded_files = st.file_uploader("Choose a PDF file", type=["pdf"],accept_multiple_files=True)
+if uploaded_files: 
+    if st.button("Process Documents"):
+        with st.spinner("Ingesting documents..."):
+            # 2. Loop through each file in the list
+            for uploaded_file in uploaded_files:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    tmp.write(uploaded_file.getvalue())
+                    tmp_path = tmp.name
+                
+                try:
+                    ingest_documents_to_qdrant(tmp_path)
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
+            
+            st.success(f"Processed {len(uploaded_files)} files!")
+            
+# if uploaded_file:
+    
+#     if st.button("Start Ingestion", type="primary"):
+#         with st.spinner("Processing PDF and creating embeddings..."):
+#             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+#                 tmp.write(uploaded_file.getvalue())
+#                 tmp_path = tmp.name
+#             try:
+#                 ingest_documents_to_qdrant(tmp_path)
+#                 st.success("Success! The knowledge base has been updated.")
+#             except Exception as e:
+#                 st.error(f"Error: {e}")
+#             finally:
+#                 if os.path.exists(tmp_path):
+#                     os.remove(tmp_path)
 
-if uploaded_file:
-    if st.button("Start Ingestion", type="primary"):
-        with st.spinner("Processing PDF and creating embeddings..."):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded_file.getvalue())
-                tmp_path = tmp.name
-            try:
-                ingest_documents_to_qdrant(tmp_path)
-                st.success("Success! The knowledge base has been updated.")
-            except Exception as e:
-                st.error(f"Error: {e}")
-            finally:
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)

@@ -167,7 +167,7 @@ def ingest_documents_to_qdrant(pdf_files):
                 collection_name=config.COLLECTION_NAME,
                 limit=1,
                 with_payload=True,
-                order_by={"key": "file_chunk_id", "direction": "desc"} # Following your snippet logic
+                # order_by={"key": "file_chunk_id", "direction": "desc"} # Following your snippet logic
             )
             if res:
                 product_offset = res[0].payload.get("global_chunk_id", 0) + 1

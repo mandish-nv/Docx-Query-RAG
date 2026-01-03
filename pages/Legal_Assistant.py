@@ -48,7 +48,7 @@ if user_query := st.chat_input("Ask a legal question..."):
             if docs:
                 with st.expander("Source Context"):
                     for d in docs:
-                        st.markdown(f"**Page {d['page']}** (Score: {d['score']:.2f})")
-                        st.caption(d["content"])
+                        st.markdown(f"**Page {d['page_number']}** (Score: {d['score']:.2f})")
+                        st.caption(d["chunk"])
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
