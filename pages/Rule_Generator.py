@@ -21,28 +21,53 @@ st.markdown("""
 #     if st.button("⬅ Back to Dashboard"):
 #         st.switch_page("main.py") # or your main dashboard file
 
-col_input, col_output = st.columns([1, 2])
+# Initialize session state for persistence
+if "generated_rules" not in st.session_state:
+    st.session_state.generated_rules = None
 
-with col_input:
-    st.header("Parameters")
-    industry = st.selectbox("Industry", options=list(config.INDUSTRY_MANDATORY_RULES.keys()))
-    custom_input = st.text_area("Specific Requirements", placeholder="e.g. Remote work policy for devs", height=200)
-    generate_btn = st.button("Generate Rule Book", type="primary", use_container_width=True)
+# Using a single column layout or a container to ensure tabs appear below the button
+st.header("Parameters")
+industry = st.selectbox("Industry", options=list(config.INDUSTRY_MANDATORY_RULES.keys()))
+custom_input = st.text_area("Specific Requirements", placeholder="e.g. Remote work policy for devs", height=200)
 
+generate_btn = st.button("Generate Rule Book", type="primary", use_container_width=True)
+
+# 1. Logic for generation
 if generate_btn:
     if not custom_input:
         st.error("Please enter requirements.")
     else:
         with st.spinner("Generating compliant rules..."):
             rules, audit, sources = generate_compliant_rules(industry, custom_input)
-            
-        with col_output:
-            tab1, tab2, tab3 = st.tabs(["📜 Rule Book", "🔍 Compliance Audit", "📚 Sources"])
-            with tab1:
-                st.markdown(rules)
-                st.download_button("Download Markdown", rules, file_name="rulebook.md")
-            with tab2:
-                st.markdown(audit)
-            with tab3:
-                for s in sources:
-                    st.info(f"Page {s['page']}: {s['content'][:300]}...")
+            # Store results in session state to prevent loss on rerun
+            st.session_state.generated_rules = {
+                "rules": rules,
+                "audit": audit,
+                "sources": sources
+            }
+
+st.divider()
+
+# 2. Display logic (Placed below the button)
+if st.session_state.generated_rules:
+    res = st.session_state.generated_rules
+    
+    # Tabs now appear below the generation button in the main flow
+    tab1, tab2, tab3 = st.tabs(["📜 Rule Book", "🔍 Compliance Audit", "📚 Sources"])
+    
+    with tab1:
+        st.markdown(res["rules"])
+        # Download button will trigger a rerun, but session_state persists the data
+        st.download_button(
+            label="Download Markdown",
+            data=res["rules"],
+            file_name="rulebook.md",
+            mime="text/markdown"
+        )
+        
+    with tab2:
+        st.markdown(res["audit"])
+        
+    with tab3:
+        for s in res["sources"]:
+            st.info(f"Page {s['page']}: {s['content'][:300]}...")

@@ -4,9 +4,9 @@ import os
 from ingestion_pipeline import ingest_documents_to_qdrant
 from utils.ui_components import init_page
 
-user_info = init_page("Document Ingestion")
-
 st.set_page_config(page_title="Document Ingestion")
+
+user_info = init_page("Document Ingestion")
 
 st.markdown("""
     <style>
